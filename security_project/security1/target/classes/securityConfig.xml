@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/security
+          http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <!-- 不过滤权限 -->
+    <security:http pattern="/userinfo/login" security="none"></security:http>
+
+
+    <!-- 控制权限 -->
+    <bean id = "myLoginUrlAuthenticationEntryPoint" class="cyf.userinfo.domain.LoginUrlAuthenticationEntryPoint">
+        <constructor-arg index="0" value="/main.html"></constructor-arg>
+    </bean>
+    <security:http entry-point-ref="myLoginUrlAuthenticationEntryPoint" use-expressions="false" >
+        <security:headers>
+            <security:frame-options policy="SAMEORIGIN" />
+        </security:headers>
+        <security:anonymous enabled="false"></security:anonymous>
+        <security:csrf disabled="true"></security:csrf>
+        <security:intercept-url pattern="/userinfo/add/**" access="ROLE_USER" />
+    </security:http>
+
+
+    <bean id="userPermissionsService" class="cyf.userinfo.service.UserPermissionsService"></bean>
+    <!-- 自定义权限管理，使用自己的user-service -->
+    <security:authentication-manager>
+        <security:authentication-provider user-service-ref="userPermissionsService">
+            <security:password-encoder hash="md5"/>
+        </security:authentication-provider>
+    </security:authentication-manager>
+
+</beans>
